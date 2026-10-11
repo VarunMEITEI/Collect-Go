@@ -1,0 +1,44 @@
+
+name: Build Collects Go APK
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Extract game project
+        run: unzip collects_go_project.zip -d source
+
+      - name: Build APK
+        working-directory: source/collects_go_build_project
+        run: |
+          flutter pub get
+          flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: collects-go-apk
+          path: source/collects_go_build_project/build/app/outputs/flutter-apk/app-release.apk
+          
